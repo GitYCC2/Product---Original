@@ -23,7 +23,7 @@ namespace Producks.Web.Controllers
         [HttpGet("api/Brands")]
         public async Task<IActionResult> GetBrands()
         {
-            var brands = await _context.Brands
+            var brands = await _context.Brands.Where(b => b.Active)
                                        .Select(b => new BrandDto
                                        {
                                            Id = b.Id,
@@ -32,6 +32,44 @@ namespace Producks.Web.Controllers
                                        })
                                        .ToListAsync();
             return Ok(brands);
+        }
+
+        // GET: api/Categories
+        [HttpGet("api/Categories")]
+        public async Task<IActionResult> GetCategories()
+        {
+            var categories = await _context.Categories.Where(c => c.Active)
+                                       .Select(c => new CategoryDto
+                                       {
+                                           Id = c.Id,
+                                           Name = c.Name,
+                                           Active = c.Active,
+                                           Description = c.Description
+                                       })
+                                       .ToListAsync();
+            return Ok(categories);
+        }
+
+        // GET: api/Products
+        [HttpGet("api/Products")]
+        public async Task<IActionResult> GetProducts(int? brandId, int? categoryId, int? min, int? max)
+        {
+            var products = await _context.Products.Where(p => (p.Price <= max && p.Price >= min)
+                                                    && (p.CategoryId == categoryId || categoryId == null)
+                                                    && (p.BrandId == brandId || brandId == null))
+                                       .Select(p => new ProductDto
+                                       {
+                                           Id = p.Id,
+                                           Name = p.Name,
+                                           Active = p.Active,
+                                           Description = p.Description,
+                                           BrandId = p.BrandId,
+                                           Price = p.Price,
+                                           StockLevel = p.StockLevel,
+                                           CategoryId = p.CategoryId
+                                       })
+                                       .ToListAsync();
+            return Ok(products);
         }
     }
 }
